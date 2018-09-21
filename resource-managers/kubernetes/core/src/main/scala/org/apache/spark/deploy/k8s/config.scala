@@ -195,6 +195,25 @@ package object config extends Logging {
       .timeConf(TimeUnit.MILLISECONDS)
       .createWithDefaultString("1s")
 
+  //Spark resource staging client.
+  private[spark] val RESOURCE_STAGING_CLIENT_CONNECTION_TIMEOUT =
+    ConfigBuilder("spark.kubernetes.resourceStagingClient.connectionTimeout")
+      .doc("The connection Timeout of connect to the Spark resource staging server.")
+      .stringConf
+      .createWithDefault(null)
+
+  private[spark] val RESOURCE_STAGING_CLIENT_WRITE_TIMEOUT =
+    ConfigBuilder("spark.kubernetes.resourceStagingClient.writeTimeout")
+      .doc("The write Timeout of connect to the Spark resource staging server.")
+      .stringConf
+      .createWithDefault(null)
+
+  private[spark] val RESOURCE_STAGING_CLIENT_READ_TIMEOUT =
+    ConfigBuilder("spark.kubernetes.resourceStagingClient.readTimeout")
+      .doc("The read Timeout of connect to the Spark resource staging server.")
+      .stringConf
+      .createWithDefault(null)
+
   // Spark resource staging server.
   private[spark] val RESOURCE_STAGING_SERVER_API_SERVER_URL =
     ConfigBuilder("spark.kubernetes.resourceStagingServer.apiServer.url")

@@ -127,6 +127,33 @@ private[spark] class BaseDriverConfigurationStep(
         .addToLimits(maybeCpuLimitQuantity.toMap.asJava)
         .endResources()
       .build()
+
+    val imagePullSecrets = submissionSparkConf.get("spark.kubernetes.pod.imagePullSecrets", "none")
+    var baseDriverPodBuilder = new PodBuilder(driverSpec.driverPod)
+      .editOrNewMetadata()
+      .withName(kubernetesDriverPodName)
+      .addToLabels(driverLabels.asJava)
+      .addToAnnotations(allDriverAnnotations.asJava)
+      .endMetadata()
+
+    if("none".equals(imagePullSecrets)){
+      baseDriverPodBuilder.withNewSpec()
+        .withRestartPolicy("Never")
+        .withNodeSelector(nodeSelector.asJava)
+        .endSpec();
+    }else{
+      val imagePullSecretsArray = imagePullSecrets.split(",")
+
+      val spec = baseDriverPodBuilder.withNewSpec()
+      for (index <- 0 until imagePullSecretsArray.length){
+        spec.addNewImagePullSecret(imagePullSecretsArray(index))
+      }
+      spec.withRestartPolicy("Never")
+        .withNodeSelector(nodeSelector.asJava)
+        .endSpec();
+    }
+
+    /**
     val baseDriverPod = new PodBuilder(driverSpec.driverPod)
       .editOrNewMetadata()
         .withName(kubernetesDriverPodName)
@@ -138,6 +165,9 @@ private[spark] class BaseDriverConfigurationStep(
         .withNodeSelector(nodeSelector.asJava)
         .endSpec()
       .build()
+    **/
+
+    val baseDriverPod = baseDriverPodBuilder.build()
     val resolvedSparkConf = driverSpec.driverSparkConf.clone()
       .setIfMissing(KUBERNETES_DRIVER_POD_NAME, kubernetesDriverPodName)
       .set("spark.app.id", kubernetesAppId)

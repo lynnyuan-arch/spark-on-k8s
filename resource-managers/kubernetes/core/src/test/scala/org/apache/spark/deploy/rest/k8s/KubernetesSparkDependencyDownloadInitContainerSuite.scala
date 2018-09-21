@@ -82,7 +82,7 @@ class KubernetesSparkDependencyDownloadInitContainerSuite
     retrofitClient = mock[ResourceStagingServiceRetrofit]
     fileFetcher = mock[FileFetcher]
     when(retrofitClientFactory.createRetrofitClient(
-        STAGING_SERVER_URI, classOf[ResourceStagingServiceRetrofit], STAGING_SERVER_SSL_OPTIONS))
+        STAGING_SERVER_URI, Map("connectionTimeout"->"10000"),classOf[ResourceStagingServiceRetrofit], STAGING_SERVER_SSL_OPTIONS))
       .thenReturn(retrofitClient)
   }
 

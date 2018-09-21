@@ -97,6 +97,7 @@ class ResourceStagingServerSuite extends SparkFunSuite with BeforeAndAfter with 
     val scheme = if (sslOptions.enabled) "https" else "http"
     val retrofitService = RetrofitClientFactoryImpl.createRetrofitClient(
       s"$scheme://127.0.0.1:$serverPort/",
+      Map("connectionTimeout"->"10000"),
       classOf[ResourceStagingServiceRetrofit],
       sslOptions)
     val resourcesBytes = Array[Byte](1, 2, 3, 4)

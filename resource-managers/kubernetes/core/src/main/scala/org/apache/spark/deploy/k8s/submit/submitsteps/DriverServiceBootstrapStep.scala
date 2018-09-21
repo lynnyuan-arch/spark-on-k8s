@@ -79,8 +79,27 @@ private[spark] class DriverServiceBootstrapStep(
         .endSpec()
       .build()
 
+    val uiPort = submissionSparkConf.getInt("spark.ui.port", DEFAULT_UI_PORT)
+    val nodePort = submissionSparkConf.getInt("spark.kubernetes.driver.nodeport", 0)
+    val driver_ui_service=resolvedServiceName+"-ui"
+    val driverService_ui = new ServiceBuilder()
+      .withNewMetadata()
+        .withName(driver_ui_service)
+        .endMetadata()
+      .withNewSpec()
+        .withType("NodePort")
+        .withSelector(driverLabels.asJava)
+        .addNewPort()
+          .withName("driver-ui-port")
+          .withPort(uiPort)
+          .withNodePort(nodePort)
+          .endPort()
+        .endSpec()
+      .build()
+
     val namespace = submissionSparkConf.get(KUBERNETES_NAMESPACE)
-    val driverHostname = s"${driverService.getMetadata.getName}.$namespace.svc.cluster.local"
+    val domain= submissionSparkConf.get("spark.kubernetes.svc.domain", "svc.cluster.local")
+    val driverHostname = s"${driverService.getMetadata.getName}.$namespace.$domain"
     val resolvedSparkConf = driverSpec.driverSparkConf.clone()
         .set(org.apache.spark.internal.config.DRIVER_HOST_ADDRESS, driverHostname)
         .set("spark.driver.port", driverPort.toString)
@@ -89,7 +108,7 @@ private[spark] class DriverServiceBootstrapStep(
 
     driverSpec.copy(
       driverSparkConf = resolvedSparkConf,
-      otherKubernetesResources = driverSpec.otherKubernetesResources ++ Seq(driverService))
+      otherKubernetesResources = driverSpec.otherKubernetesResources ++ Seq(driverService,driverService_ui))
   }
 }
 
@@ -97,5 +116,5 @@ private[spark] object DriverServiceBootstrapStep {
   val DRIVER_BIND_ADDRESS_KEY = org.apache.spark.internal.config.DRIVER_BIND_ADDRESS.key
   val DRIVER_HOST_KEY = org.apache.spark.internal.config.DRIVER_HOST_ADDRESS.key
   val DRIVER_SVC_POSTFIX = "-driver-svc"
-  val MAX_SERVICE_NAME_LENGTH = 63
+  val MAX_SERVICE_NAME_LENGTH = 59 //原63，减去-ui的长度
 }

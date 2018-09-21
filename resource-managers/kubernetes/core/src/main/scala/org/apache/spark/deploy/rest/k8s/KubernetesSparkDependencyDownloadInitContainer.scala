@@ -152,12 +152,14 @@ private[spark] class KubernetesSparkDependencyDownloadInitContainer(
       downloadFinishedMessage: String,
       errMessageOnSecretNotAFile: String,
       errMessageOnDownloadDirNotADirectory: String): Unit = {
+
     maybeResourceStagingServerUri.foreach { resourceStagingServerUri =>
       maybeResourceId.foreach { resourceId =>
         require(resourceSecretLocation.isFile, errMessageOnSecretNotAFile)
         require(resourceDownloadDir.isDirectory, errMessageOnDownloadDirNotADirectory)
         val service = retrofitClientFactory.createRetrofitClient(
           resourceStagingServerUri,
+          Map("connectionTimeout"->"10000"),
           classOf[ResourceStagingServiceRetrofit],
           resourceStagingServerSslOptions)
         val resourceSecret = Files.toString(resourceSecretLocation, Charsets.UTF_8)

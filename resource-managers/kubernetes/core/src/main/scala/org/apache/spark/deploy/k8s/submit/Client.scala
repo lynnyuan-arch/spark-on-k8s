@@ -18,7 +18,7 @@ package org.apache.spark.deploy.k8s.submit
 
 import java.util.{Collections, UUID}
 
-import io.fabric8.kubernetes.api.model.{ContainerBuilder, EnvVar, EnvVarBuilder, OwnerReferenceBuilder, PodBuilder}
+import io.fabric8.kubernetes.api.model._
 import io.fabric8.kubernetes.client.KubernetesClient
 import scala.collection.mutable
 import scala.collection.JavaConverters._
@@ -122,6 +122,7 @@ private[spark] class Client(
             .withName(resolvedDriverPod.getMetadata.getName)
             .watch(loggingPodStatusWatcher)) { _ =>
       val createdDriverPod = kubernetesClient.pods().create(resolvedDriverPod)
+      var otherKubernetesResources:Seq[HasMetadata] = Seq.empty
       try {
         if (currentDriverSpec.otherKubernetesResources.nonEmpty) {
           val driverPodOwnerReference = new OwnerReferenceBuilder()
@@ -135,18 +136,21 @@ private[spark] class Client(
             val originalMetadata = resource.getMetadata
             originalMetadata.setOwnerReferences(Collections.singletonList(driverPodOwnerReference))
           }
-          val otherKubernetesResources = currentDriverSpec.otherKubernetesResources
+          otherKubernetesResources = currentDriverSpec.otherKubernetesResources
           kubernetesClient.resourceList(otherKubernetesResources: _*).createOrReplace()
         }
       } catch {
         case e: Throwable =>
           kubernetesClient.pods().delete(createdDriverPod)
+          //delete_otherResources(kubernetesClient,otherKubernetesResources);
+          kubernetesClient.resourceList(otherKubernetesResources: _*).delete()
           throw e
       }
       if (waitForAppCompletion) {
         logInfo(s"Waiting for application $appName to finish...")
         loggingPodStatusWatcher.awaitCompletion()
         logInfo(s"Application $appName finished.")
+        kubernetesClient.resourceList(otherKubernetesResources: _*).delete()
       } else {
         logInfo(s"Deployed Spark application $appName into Kubernetes.")
       }

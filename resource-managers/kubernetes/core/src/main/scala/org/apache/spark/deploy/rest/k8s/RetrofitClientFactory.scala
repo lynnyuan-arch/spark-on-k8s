@@ -34,7 +34,7 @@ import org.apache.spark.internal.Logging
 import org.apache.spark.util.{ThreadUtils, Utils}
 
 private[spark] trait RetrofitClientFactory {
-  def createRetrofitClient[T](baseUrl: String, serviceType: Class[T], sslOptions: SSLOptions): T
+  def createRetrofitClient[T](baseUrl: String, config: Map[String, String]=null, serviceType: Class[T], sslOptions: SSLOptions): T
 }
 
 private[spark] object RetrofitClientFactoryImpl extends RetrofitClientFactory with Logging {
@@ -42,7 +42,7 @@ private[spark] object RetrofitClientFactoryImpl extends RetrofitClientFactory wi
   private val OBJECT_MAPPER = new ObjectMapper().registerModule(new DefaultScalaModule)
   private val SECURE_RANDOM = new SecureRandom()
 
-  def createRetrofitClient[T](baseUrl: String, serviceType: Class[T], sslOptions: SSLOptions): T = {
+  def createRetrofitClient[T](baseUrl: String, config: Map[String, String]=null, serviceType: Class[T], sslOptions: SSLOptions): T = {
     val dispatcher = new Dispatcher(ThreadUtils.newDaemonCachedThreadPool(s"http-client-$baseUrl"))
     val serviceUri = URI.create(baseUrl)
     val maybeAllProxy = Option.apply(System.getProperty(Config.KUBERNETES_ALL_PROXY))
@@ -67,6 +67,23 @@ private[spark] object RetrofitClientFactoryImpl extends RetrofitClientFactory wi
       .proxy(resolvedProxy)
     logDebug(s"Proxying to $baseUrl through address ${resolvedProxy.address()} with proxy of" +
       s" type ${resolvedProxy.`type`()}")
+
+    if(null != config && null != config.get("connectionTimeout")){
+      okHttpClientBuilder.connectTimeout(config.getOrElse("connectionTimeout", "10000").toLong, java.util.concurrent.TimeUnit.MILLISECONDS)
+      val timeout = config.getOrElse("connectionTimeout", "10000");
+      logInfo(s"client connectionTimeout: $timeout")
+    }
+    if(null != config && null != config.get("writeTimeout")){
+      okHttpClientBuilder.writeTimeout(config.getOrElse("writeTimeout",  "10000").toLong, java.util.concurrent.TimeUnit.MILLISECONDS)
+      val timeout = config.getOrElse("writeTimeout", "10000");
+      logInfo(s"client writeTimeout: $timeout")
+    }
+    if(null != config && null != config.get("readTimeout")){
+      okHttpClientBuilder.readTimeout(config.getOrElse("readTimeout", "10000").toLong, java.util.concurrent.TimeUnit.MILLISECONDS)
+      val timeout = config.getOrElse("readTimeout", "10000");
+      logInfo(s"client readTimeout: $timeout")
+    }
+
     sslOptions.trustStore.foreach { trustStoreFile =>
       require(trustStoreFile.isFile, s"TrustStore provided at ${trustStoreFile.getAbsolutePath}"
         + " does not exist, or is not a file.")

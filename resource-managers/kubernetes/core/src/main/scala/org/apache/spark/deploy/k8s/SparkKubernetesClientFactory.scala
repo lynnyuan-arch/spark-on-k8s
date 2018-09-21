@@ -67,18 +67,21 @@ private[spark] object SparkKubernetesClientFactory {
         .withApiVersion("v1")
         .withMasterUrl(master)
         .withWebsocketPingInterval(0)
+        .withTrustCerts(true)
         .withOption(oauthTokenValue) {
           (token, configBuilder) => configBuilder.withOauthToken(token)
         }.withOption(oauthTokenFile) {
           (file, configBuilder) =>
               configBuilder.withOauthToken(Files.toString(file, Charsets.UTF_8))
-        }.withOption(caCertFile) {
+        }
+      /*.withOption(caCertFile) {
           (file, configBuilder) => configBuilder.withCaCertFile(file)
         }.withOption(clientKeyFile) {
           (file, configBuilder) => configBuilder.withClientKeyFile(file)
         }.withOption(clientCertFile) {
           (file, configBuilder) => configBuilder.withClientCertFile(file)
-        }.withOption(namespace) {
+        }*/
+        .withOption(namespace) {
           (ns, configBuilder) => configBuilder.withNamespace(ns)
         }.build()
     val baseHttpClient = HttpClientUtils.createHttpClient(config)

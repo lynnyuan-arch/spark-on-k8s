@@ -76,7 +76,7 @@ private[spark] class SubmittedDependencyUploaderSuite extends SparkFunSuite with
     retrofitClient = mock[ResourceStagingServiceRetrofit]
     Mockito.when(
       retrofitClientFactory.createRetrofitClient(
-        STAGING_SERVER_URI, classOf[ResourceStagingServiceRetrofit], STAGING_SERVER_SSL_OPTIONS))
+        STAGING_SERVER_URI,Map("connectionTimeout"->"10000"),classOf[ResourceStagingServiceRetrofit], STAGING_SERVER_SSL_OPTIONS))
       .thenReturn(retrofitClient)
     val responseCall = mock[Call[SubmittedResourceIdAndSecret]]
     Mockito.when(responseCall.execute()).thenReturn(
@@ -88,6 +88,7 @@ private[spark] class SubmittedDependencyUploaderSuite extends SparkFunSuite with
         LABELS,
         NAMESPACE,
         STAGING_SERVER_URI,
+        Map("connectionTimeout"->"10000"),
         JARS,
         FILES,
         STAGING_SERVER_SSL_OPTIONS,

@@ -206,6 +206,7 @@ private[spark] class ExecutorPodFactoryImpl(
             .endOwnerReference()
         .endMetadata()
       .withNewSpec()
+        .withImagePullSecrets(driverPod.getSpec.getImagePullSecrets)
         .withHostname(hostname)
         .withRestartPolicy("Never")
         .withNodeSelector(nodeSelector.asJava)

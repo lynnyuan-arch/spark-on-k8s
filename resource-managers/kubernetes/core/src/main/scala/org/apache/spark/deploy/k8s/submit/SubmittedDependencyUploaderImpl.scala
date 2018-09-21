@@ -53,6 +53,7 @@ private[spark] class SubmittedDependencyUploaderImpl(
     podLabels: Map[String, String],
     podNamespace: String,
     stagingServerUri: String,
+    config: Map[String, String],
     sparkJars: Seq[String],
     sparkFiles: Seq[String],
     stagingServiceSslOptions: SSLOptions,
@@ -88,8 +89,10 @@ private[spark] class SubmittedDependencyUploaderImpl(
     val filesRequestBody = RequestBody.create(
         okhttp3.MediaType.parse(MediaType.MULTIPART_FORM_DATA), filesTgz)
 
+
     val service = retrofitClientFactory.createRetrofitClient(
       stagingServerUri,
+      config,
       classOf[ResourceStagingServiceRetrofit],
       stagingServiceSslOptions)
     val uploadResponse = service.uploadResources(
