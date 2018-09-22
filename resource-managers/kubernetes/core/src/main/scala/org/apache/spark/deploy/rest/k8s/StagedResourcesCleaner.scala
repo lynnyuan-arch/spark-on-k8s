@@ -37,12 +37,12 @@ private[spark] trait StagedResourcesCleaner {
 }
 
 private class StagedResourcesCleanerImpl(
-      onSameK8s: Boolean,
       stagedResourcesStore: StagedResourcesStore,
       kubernetesClient: KubernetesClient,
       cleanupExecutorService: ScheduledExecutorService,
       clock: Clock,
-      initialAccessExpirationMs: Long)
+      initialAccessExpirationMs: Long,
+      onSameK8s : Boolean = true)
     extends StagedResourcesCleaner with Logging{
 
   private val CLEANUP_INTERVAL_MS = 30000

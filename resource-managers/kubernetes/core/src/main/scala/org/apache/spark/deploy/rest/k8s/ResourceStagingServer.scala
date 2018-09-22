@@ -118,13 +118,13 @@ object ResourceStagingServer {
             .filter( _ => useServiceAccountCredentials))
 
     val stagedResourcesStore = new StagedResourcesStoreImpl(dependenciesRootDir)
+    val onSameK8s = sparkConf.getBoolean("spark.kubernetes.resourceStagingServer.on-same-k8s", true)
     val stagedResourcesCleaner = new StagedResourcesCleanerImpl(
-      sparkConf.getBoolean("spark.kubernetes.resourceStagingServer.on-same-k8s", true),
       stagedResourcesStore,
       kubernetesClient,
       ThreadUtils.newDaemonSingleThreadScheduledExecutor("resource-expiration"),
       new SystemClock(),
-      initialAccessExpirationMs)
+      initialAccessExpirationMs, onSameK8s)
     stagedResourcesCleaner.start()
     val serviceInstance = new ResourceStagingServiceImpl(
         stagedResourcesStore, stagedResourcesCleaner)
