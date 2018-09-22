@@ -42,14 +42,16 @@ private class StagedResourcesCleanerImpl(
       cleanupExecutorService: ScheduledExecutorService,
       clock: Clock,
       initialAccessExpirationMs: Long)
-    extends StagedResourcesCleaner {
+    extends StagedResourcesCleaner with Logging{
 
   private val CLEANUP_INTERVAL_MS = 30000
+//  private val CLEANUP_INTERVAL_MS = 300000
   private val RESOURCE_LOCK = new Object()
   private val activeResources = mutable.Map.empty[String, MonitoredResource]
   private val unusedResources = mutable.Map.empty[String, UnusedMonitoredResource]
 
   override def start(): Unit = {
+    logInfo(s"-------------------start StagedResourcesCleaner------------------- ")
     cleanupExecutorService.scheduleAtFixedRate(
         new CleanupRunnable(),
         CLEANUP_INTERVAL_MS,
@@ -60,16 +62,18 @@ private class StagedResourcesCleanerImpl(
   override def registerResourceForCleaning(
       resourceId: String, stagedResourceOwner: StagedResourcesOwner): Unit = {
     RESOURCE_LOCK.synchronized {
+      logInfo(s"----resourceId: $resourceId registerForCleanning----")
       unusedResources(resourceId) = UnusedMonitoredResource(
           clock.getTimeMillis() + initialAccessExpirationMs,
           MonitoredResource(resourceId, stagedResourceOwner))
-
+      logInfo(s"----ExpireTime:${initialAccessExpirationMs}")
     }
   }
 
   override def markResourceAsUsed(resourceId: String): Unit = RESOURCE_LOCK.synchronized {
     val resource = unusedResources.remove(resourceId)
     resource.foreach { res =>
+      logInfo(s"----resourceId: $resourceId markResourceAsUsed----")
       activeResources(resourceId) = res.resource
     }
   }
@@ -77,6 +81,7 @@ private class StagedResourcesCleanerImpl(
   private class CleanupRunnable extends Runnable with Logging {
 
     override def run(): Unit = {
+      logInfo(s"------------------- CleanupRunnable start------------------- ")
       // Make a copy so we can iterate through this while modifying
       val activeResourcesCopy = RESOURCE_LOCK.synchronized {
         Map.apply(activeResources.toSeq: _*)

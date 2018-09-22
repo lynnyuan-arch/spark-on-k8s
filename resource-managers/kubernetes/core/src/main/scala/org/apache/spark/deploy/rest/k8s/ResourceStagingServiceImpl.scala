@@ -39,6 +39,7 @@ private[spark] class ResourceStagingServiceImpl(
   override def uploadResources(
       resources: InputStream,
       resourcesOwner: StagedResourcesOwner): SubmittedResourceIdAndSecret = {
+    logInfo(s"---------uploadResources, resourcesOwner: ${resourcesOwner.ownerNamespace}---------")
     val stagedResources = stagedResourcesStore.addResources(
         resourcesOwner.ownerNamespace, resources)
     stagedResourcesCleaner.registerResourceForCleaning(
@@ -47,6 +48,7 @@ private[spark] class ResourceStagingServiceImpl(
   }
 
   override def downloadResources(resourceId: String, resourceSecret: String): StreamingOutput = {
+    logInfo(s"downloadResouces, resourceId: $resourceId, resourceSecret: $resourceSecret")
     val resource = stagedResourcesStore.getResources(resourceId)
         .getOrElse(throw new NotFoundException(s"No resource bundle found with id $resourceId"))
     if (!resource.resourceSecret.equals(resourceSecret)) {
