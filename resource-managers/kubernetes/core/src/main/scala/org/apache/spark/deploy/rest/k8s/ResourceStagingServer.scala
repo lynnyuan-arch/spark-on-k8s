@@ -119,6 +119,7 @@ object ResourceStagingServer {
 
     val stagedResourcesStore = new StagedResourcesStoreImpl(dependenciesRootDir)
     val stagedResourcesCleaner = new StagedResourcesCleanerImpl(
+      sparkConf.getBoolean("spark.kubernetes.resourceStagingServer.on-same-k8s", true),
       stagedResourcesStore,
       kubernetesClient,
       ThreadUtils.newDaemonSingleThreadScheduledExecutor("resource-expiration"),

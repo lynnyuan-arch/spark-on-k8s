@@ -37,6 +37,7 @@ private[spark] trait StagedResourcesCleaner {
 }
 
 private class StagedResourcesCleanerImpl(
+      onSameK8s: Boolean,
       stagedResourcesStore: StagedResourcesStore,
       kubernetesClient: KubernetesClient,
       cleanupExecutorService: ScheduledExecutorService,
@@ -105,7 +106,8 @@ private class StagedResourcesCleanerImpl(
               throw new SparkException(s"Unsupported resource owner type for cleanup:" +
                 s" ${resource.stagedResourceOwner.ownerType}")
           }
-          if (metadataOperation
+          metadataOperation.list()
+          if (onSameK8s && metadataOperation
             .withLabels(resource.stagedResourceOwner.ownerLabels.asJava)
             .list()
             .getItems
