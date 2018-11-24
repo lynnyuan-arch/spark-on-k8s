@@ -75,26 +75,17 @@ private[spark] object RetrofitClientFactoryImpl extends RetrofitClientFactory wi
     logDebug(s"Proxying to $baseUrl through address ${resolvedProxy.address()} with proxy of" +
       s" type ${resolvedProxy.`type`()}")
 
-    if(null != config
-      && null != config.get("connectionTimeout")) {
+    if(null != config.get("connectionTimeout")) {
       okHttpClientBuilder.connectTimeout(config.getOrElse("connectionTimeout", "10000").toLong,
         java.util.concurrent.TimeUnit.MILLISECONDS)
-      val timeout = config.getOrElse("connectionTimeout", "10000");
-      logInfo(s"client connectionTimeout: $timeout")
     }
-    if(null != config
-      && null != config.get("writeTimeout")) {
+    if(null != config.get("writeTimeout")) {
       okHttpClientBuilder.writeTimeout(config.getOrElse("writeTimeout", "10000").toLong,
         java.util.concurrent.TimeUnit.MILLISECONDS)
-      val timeout = config.getOrElse("writeTimeout", "10000")
-      logInfo(s"client writeTimeout: $timeout")
     }
-    if(null != config
-      && null != config.get("readTimeout")) {
+    if(null != config.get("readTimeout")) {
       okHttpClientBuilder.readTimeout(config.getOrElse("readTimeout", "10000").toLong,
         java.util.concurrent.TimeUnit.MILLISECONDS)
-      val timeout = config.getOrElse("readTimeout", "10000")
-      logInfo(s"client readTimeout: $timeout")
     }
 
     sslOptions.trustStore.foreach { trustStoreFile =>

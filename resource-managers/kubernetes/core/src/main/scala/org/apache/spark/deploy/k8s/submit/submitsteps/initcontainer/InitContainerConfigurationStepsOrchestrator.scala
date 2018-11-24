@@ -118,11 +118,11 @@ private[spark] class InitContainerConfigurationStepsOrchestrator(
           stagingServerUri,
         Map(
           "connectionTimeout" -> submissionSparkConf.get(
-            RESOURCE_STAGING_CLIENT_CONNECTION_TIMEOUT, "10000"),
+            RESOURCE_STAGING_CLIENT_CONNECTION_TIMEOUT),
           "writeTimeout" -> submissionSparkConf.get(
-            RESOURCE_STAGING_CLIENT_WRITE_TIMEOUT, "10000"),
+            RESOURCE_STAGING_CLIENT_WRITE_TIMEOUT),
           "readTimeout" -> submissionSparkConf.get(
-            RESOURCE_STAGING_CLIENT_READ_TIMEOUT, "10000")),
+            RESOURCE_STAGING_CLIENT_READ_TIMEOUT)),
           sparkJars,
           sparkFiles,
           new ResourceStagingServerSslOptionsProviderImpl(submissionSparkConf).getSslOptions,
