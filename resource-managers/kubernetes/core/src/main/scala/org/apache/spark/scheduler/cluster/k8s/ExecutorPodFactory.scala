@@ -16,9 +16,11 @@
  */
 package org.apache.spark.scheduler.cluster.k8s
 
-import io.fabric8.kubernetes.api.model.{ContainerBuilder, ContainerPortBuilder, EnvVar, EnvVarBuilder, EnvVarSourceBuilder, Pod, PodBuilder, QuantityBuilder, VolumeBuilder, VolumeMountBuilder}
-import scala.collection.JavaConverters._
+import java.nio.file.Paths
 
+import io.fabric8.kubernetes.api.model.{ContainerBuilder, ContainerPortBuilder, EnvVar, EnvVarBuilder, EnvVarSourceBuilder, Pod, PodBuilder, QuantityBuilder, VolumeBuilder, VolumeMountBuilder}
+
+import scala.collection.JavaConverters._
 import org.apache.spark.{SparkConf, SparkException}
 import org.apache.spark.deploy.k8s.{ConfigurationUtils, InitContainerResourceStagingServerSecretPlugin, PodWithDetachedInitContainer, SparkPodInitContainerBootstrap}
 import org.apache.spark.deploy.k8s.config._
@@ -177,6 +179,18 @@ private[spark] class ExecutorPodFactoryImpl(
     val shuffleVolumesWithMounts = executorLocalDirVolumeProvider
         .getExecutorLocalDirVolumesWithMounts
 
+    // lynn add logdir mount
+    val logDir = driverPod.getMetadata.getAnnotations.get("spark.log.dir")
+    val driverHostPath = driverPod.getMetadata.getAnnotations.get("spark.log.dir.host.path")
+    val logDirVolume = new VolumeBuilder()
+      .withName(s"spark-log-dir-${Paths.get(logDir).getFileName.toString}")
+      .withNewHostPath(s"$driverHostPath-exec-$executorId")
+      .build()
+    val logDirVolumeMount = new VolumeMountBuilder()
+      .withName(logDirVolume.getName)
+      .withMountPath(logDir)
+      .build()
+
     val executorContainer = new ContainerBuilder()
       .withName(s"executor")
       .withImage(executorDockerImage)
@@ -189,6 +203,7 @@ private[spark] class ExecutorPodFactoryImpl(
       .addAllToEnv(executorEnv.asJava)
       .withPorts(requiredPorts.asJava)
       .addAllToVolumeMounts(shuffleVolumesWithMounts.map(_._2).asJava)
+      .addToVolumeMounts(logDirVolumeMount)
       .build()
 
     val executorPod = new PodBuilder()
@@ -211,6 +226,7 @@ private[spark] class ExecutorPodFactoryImpl(
         .withRestartPolicy("Never")
         .withNodeSelector(nodeSelector.asJava)
         .addAllToVolumes(shuffleVolumesWithMounts.map(_._1).asJava)
+        .addToVolumes(logDirVolume)
         .endSpec()
       .build()
 

@@ -101,6 +101,10 @@ private[spark] class LocalDirectoryMountConfigurationStep(
 
     driverSpec.copy(
       driverPod = new PodBuilder(driverSpec.driverPod)
+          .editOrNewMetadata()
+        .addToAnnotations("spark.log.dir", logDir)
+        .addToAnnotations("spark.log.dir.host.path", hostPath)
+        .endMetadata()
         .editSpec()
         .addToVolumes(localDirVolumes: _*).addToVolumes(Array(logDirVolume): _*)
         .endSpec()
