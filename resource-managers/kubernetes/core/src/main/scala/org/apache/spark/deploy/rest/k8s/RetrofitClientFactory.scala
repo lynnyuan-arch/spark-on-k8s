@@ -35,7 +35,7 @@ import org.apache.spark.util.{ThreadUtils, Utils}
 
 private[spark] trait RetrofitClientFactory {
   def createRetrofitClient[T](baseUrl: String,
-                              config: Map[String, String]=null,
+                              config: Map[String, String] = null,
                               serviceType: Class[T],
                               sslOptions: SSLOptions): T
 }
@@ -45,7 +45,10 @@ private[spark] object RetrofitClientFactoryImpl extends RetrofitClientFactory wi
   private val OBJECT_MAPPER = new ObjectMapper().registerModule(new DefaultScalaModule)
   private val SECURE_RANDOM = new SecureRandom()
 
-  def createRetrofitClient[T](baseUrl: String, config: Map[String, String]=null, serviceType: Class[T], sslOptions: SSLOptions): T = {
+  def createRetrofitClient[T](baseUrl: String,
+                              config : Map[String, String] = null,
+                              serviceType: Class[T],
+                              sslOptions: SSLOptions): T = {
     val dispatcher = new Dispatcher(
       ThreadUtils.newDaemonCachedThreadPool(s"http-client-$baseUrl"))
     val serviceUri = URI.create(baseUrl)
@@ -79,16 +82,20 @@ private[spark] object RetrofitClientFactoryImpl extends RetrofitClientFactory wi
       val timeout = config.getOrElse("connectionTimeout", "10000");
       logInfo(s"client connectionTimeout: $timeout")
     }
-    if(null != config && null != config.get("writeTimeout")) {
-      okHttpClientBuilder.writeTimeout(config.getOrElse("writeTimeout",  "10000").toLong,
+    if(null != config
+      && null != config.get("writeTimeout")) {
+      okHttpClientBuilder.writeTimeout(
+        config.getOrElse("writeTimeout",  "10000").toLong,
         java.util.concurrent.TimeUnit.MILLISECONDS)
-      val timeout = config.getOrElse("writeTimeout", "10000");
+      val timeout = config.getOrElse("writeTimeout", "10000")
       logInfo(s"client writeTimeout: $timeout")
     }
-    if(null != config && null != config.get("readTimeout")) {
-      okHttpClientBuilder.readTimeout(config.getOrElse("readTimeout", "10000").toLong,
+    if(null != config
+      && null != config.get("readTimeout")) {
+      okHttpClientBuilder.readTimeout(
+        config.getOrElse("readTimeout", "10000").toLong,
         java.util.concurrent.TimeUnit.MILLISECONDS)
-      val timeout = config.getOrElse("readTimeout", "10000");
+      val timeout = config.getOrElse("readTimeout", "10000")
       logInfo(s"client readTimeout: $timeout")
     }
 
