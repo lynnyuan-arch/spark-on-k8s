@@ -77,24 +77,19 @@ private[spark] object RetrofitClientFactoryImpl extends RetrofitClientFactory wi
 
     if(null != config
       && null != config.get("connectionTimeout")) {
-      okHttpClientBuilder.connectTimeout(config.getOrElse("connectionTimeout", "10000").toLong,
-        java.util.concurrent.TimeUnit.MILLISECONDS)
+      okHttpClientBuilder.connectTimeout(config.getOrElse("connectionTimeout", "10000").toLong, java.util.concurrent.TimeUnit.MILLISECONDS)
       val timeout = config.getOrElse("connectionTimeout", "10000");
       logInfo(s"client connectionTimeout: $timeout")
     }
     if(null != config
       && null != config.get("writeTimeout")) {
-      okHttpClientBuilder.writeTimeout(
-        config.getOrElse("writeTimeout",  "10000").toLong, 
-        java.util.concurrent.TimeUnit.MILLISECONDS)
+      okHttpClientBuilder.writeTimeout(config.getOrElse("writeTimeout",  "10000").toLong, java.util.concurrent.TimeUnit.MILLISECONDS)
       val timeout = config.getOrElse("writeTimeout", "10000")
       logInfo(s"client writeTimeout: $timeout")
     }
     if(null != config
       && null != config.get("readTimeout")) {
-      okHttpClientBuilder.readTimeout(
-        config.getOrElse("readTimeout", "10000").toLong,
-        java.util.concurrent.TimeUnit.MILLISECONDS)
+      okHttpClientBuilder.readTimeout(config.getOrElse("readTimeout", "10000").toLong, java.util.concurrent.TimeUnit.MILLISECONDS)
       val timeout = config.getOrElse("readTimeout", "10000")
       logInfo(s"client readTimeout: $timeout")
     }
