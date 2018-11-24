@@ -54,7 +54,7 @@ private[spark] class ResourceStagingServiceImpl(
     if (!resource.resourceSecret.equals(resourceSecret)) {
       throw new NotAuthorizedException(s"Unauthorized to download resource with id $resourceId")
     }
-    //mark the resource as used
+    // mark the resource as used
     stagedResourcesCleaner.markResourceAsUsed(resourceId)
     new StreamingOutput {
       override def write(outputStream: OutputStream) = {

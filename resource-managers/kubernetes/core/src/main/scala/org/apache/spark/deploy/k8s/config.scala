@@ -195,7 +195,7 @@ package object config extends Logging {
       .timeConf(TimeUnit.MILLISECONDS)
       .createWithDefaultString("1s")
 
-  //Spark resource staging client.
+  // Spark resource staging client.
   private[spark] val RESOURCE_STAGING_CLIENT_CONNECTION_TIMEOUT =
     ConfigBuilder("spark.kubernetes.resourceStagingClient.connectionTimeout")
       .doc("The connection Timeout of connect to the Spark resource staging server.")

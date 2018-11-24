@@ -136,24 +136,24 @@ private[spark] class BaseDriverConfigurationStep(
       .addToAnnotations(allDriverAnnotations.asJava)
       .endMetadata()
 
-    if("none".equals(imagePullSecrets)){
+    if("none".equals(imagePullSecrets)) {
       baseDriverPodBuilder.withNewSpec()
         .withRestartPolicy("Never")
         .withNodeSelector(nodeSelector.asJava)
-        .endSpec();
-    }else{
+        .endSpec()
+    } else {
       val imagePullSecretsArray = imagePullSecrets.split(",")
 
       val spec = baseDriverPodBuilder.withNewSpec()
-      for (index <- 0 until imagePullSecretsArray.length){
+      for (index <- 0 until imagePullSecretsArray.length) {
         spec.addNewImagePullSecret(imagePullSecretsArray(index))
       }
       spec.withRestartPolicy("Never")
         .withNodeSelector(nodeSelector.asJava)
-        .endSpec();
+        .endSpec()
     }
 
-    /**
+    /*
     val baseDriverPod = new PodBuilder(driverSpec.driverPod)
       .editOrNewMetadata()
         .withName(kubernetesDriverPodName)
@@ -165,7 +165,7 @@ private[spark] class BaseDriverConfigurationStep(
         .withNodeSelector(nodeSelector.asJava)
         .endSpec()
       .build()
-    **/
+     */
 
     val baseDriverPod = baseDriverPodBuilder.build()
     val resolvedSparkConf = driverSpec.driverSparkConf.clone()

@@ -74,13 +74,14 @@ private[spark] object SparkKubernetesClientFactory {
           (file, configBuilder) =>
               configBuilder.withOauthToken(Files.toString(file, Charsets.UTF_8))
         }
-      /*.withOption(caCertFile) {
+      /* .withOption(caCertFile) {
           (file, configBuilder) => configBuilder.withCaCertFile(file)
         }.withOption(clientKeyFile) {
           (file, configBuilder) => configBuilder.withClientKeyFile(file)
         }.withOption(clientCertFile) {
           (file, configBuilder) => configBuilder.withClientCertFile(file)
-        }*/
+        }
+        */
         .withOption(namespace) {
           (ns, configBuilder) => configBuilder.withNamespace(ns)
         }.build()

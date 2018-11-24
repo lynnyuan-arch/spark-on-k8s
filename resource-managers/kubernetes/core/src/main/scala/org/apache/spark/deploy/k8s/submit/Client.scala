@@ -122,7 +122,7 @@ private[spark] class Client(
             .withName(resolvedDriverPod.getMetadata.getName)
             .watch(loggingPodStatusWatcher)) { _ =>
       val createdDriverPod = kubernetesClient.pods().create(resolvedDriverPod)
-      var otherKubernetesResources:Seq[HasMetadata] = Seq.empty
+      var otherKubernetesResources : Seq[HasMetadata] = Seq.empty;
       try {
         if (currentDriverSpec.otherKubernetesResources.nonEmpty) {
           val driverPodOwnerReference = new OwnerReferenceBuilder()
@@ -142,7 +142,7 @@ private[spark] class Client(
       } catch {
         case e: Throwable =>
           kubernetesClient.pods().delete(createdDriverPod)
-          //delete_otherResources(kubernetesClient,otherKubernetesResources);
+          // delete_otherResources(kubernetesClient,otherKubernetesResources);
           kubernetesClient.resourceList(otherKubernetesResources: _*).delete()
           throw e
       }
