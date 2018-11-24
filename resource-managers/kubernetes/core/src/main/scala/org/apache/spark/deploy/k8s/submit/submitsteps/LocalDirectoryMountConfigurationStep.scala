@@ -81,18 +81,33 @@ private[spark] class LocalDirectoryMountConfigurationStep(
           .withMountPath(path)
           .build()
     }
+    // lynn add logdir mount
+    val configuredLogDir = submissionSparkConf.getOption("spark.log.dir")
+    val configuredLogDirHostPath = submissionSparkConf.getOption("spark.log.dir.host.path")
+    val logDir = configuredLogDir.getOrElse(s"/var/log/$randomDirProvider")
+    val hostPath = configuredLogDirHostPath.getOrElse(s"/var/log/$randomDirProvider")
+    val logDirVolume = new VolumeBuilder()
+      .withName(s"spark-log-dir-${Paths.get(logDir).getFileName.toString}")
+      .withNewHostPath(hostPath)
+      .build()
+    val logDirVolumeMount = new VolumeMountBuilder()
+      .withName(logDirVolume.getName)
+      .withMountPath(logDir)
+      .build()
+
     val resolvedDriverSparkConf = driverSpec.driverSparkConf.clone().set(
-        "spark.local.dir", resolvedLocalDirsSingleString)
+      "spark.local.dir", resolvedLocalDirsSingleString).set(
+      "spark.log.dir", logDir).set("spark.log.dir.host.path", hostPath)
+
     driverSpec.copy(
       driverPod = new PodBuilder(driverSpec.driverPod)
         .editSpec()
-          .addToVolumes(localDirVolumes: _*)
-          .endSpec()
+        .addToVolumes(localDirVolumes: _*).addToVolumes(Array(logDirVolume): _*)
+        .endSpec()
         .build(),
       driverContainer = new ContainerBuilder(driverSpec.driverContainer)
-        .addToVolumeMounts(localDirVolumeMounts: _*)
+        .addToVolumeMounts(localDirVolumeMounts: _*).addToVolumeMounts(Array(logDirVolumeMount): _*)
         .build(),
-      driverSparkConf = resolvedDriverSparkConf
-    )
+      driverSparkConf = resolvedDriverSparkConf)
   }
 }
