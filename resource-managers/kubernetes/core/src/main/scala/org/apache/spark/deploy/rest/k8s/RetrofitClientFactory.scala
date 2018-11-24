@@ -85,7 +85,7 @@ private[spark] object RetrofitClientFactoryImpl extends RetrofitClientFactory wi
     if(null != config
       && null != config.get("writeTimeout")) {
       okHttpClientBuilder.writeTimeout(
-        config.getOrElse("writeTimeout",  "10000").toLong,
+        config.getOrElse("writeTimeout",  "10000").toLong, 
         java.util.concurrent.TimeUnit.MILLISECONDS)
       val timeout = config.getOrElse("writeTimeout", "10000")
       logInfo(s"client writeTimeout: $timeout")
