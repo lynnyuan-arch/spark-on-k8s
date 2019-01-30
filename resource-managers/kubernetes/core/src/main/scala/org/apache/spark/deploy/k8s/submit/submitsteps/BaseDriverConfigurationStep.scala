@@ -144,13 +144,28 @@ private[spark] class BaseDriverConfigurationStep(
     } else {
       val imagePullSecretsArray = imagePullSecrets.split(",")
 
-      val spec = baseDriverPodBuilder.withNewSpec()
+      val spec = baseDriverPodBuilder.editOrNewSpec()
       for (index <- 0 until imagePullSecretsArray.length) {
         spec.addNewImagePullSecret(imagePullSecretsArray(index))
       }
       spec.withRestartPolicy("Never")
         .withNodeSelector(nodeSelector.asJava)
         .endSpec()
+    }
+
+    val hostAliases = submissionSparkConf.getAllWithPrefix(KUBERNETES_HOST_ALIAS_PREFIX)
+    if(hostAliases.length > 0) {
+      val spec = baseDriverPodBuilder.editOrNewSpec()
+
+      for(i <- 0 until hostAliases.length) {
+        val hosts = hostAliases(i)._2.split(",")
+        val hostAlias = spec.addNewHostAlias().withIp(hostAliases(i)._1)
+
+        for( j <- 0 until hosts.length) {
+          hostAlias.addToHostnames(hosts(j))
+        }
+        hostAlias.endHostAlias()
+      }
     }
 
     /*
