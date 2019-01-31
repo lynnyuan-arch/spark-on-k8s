@@ -164,7 +164,7 @@ private[spark] class BaseDriverConfigurationStep(
             .addToHostnames(hosts(0)).endHostAlias()
         } else {
           spec.addNewHostAlias().withIp(hostAliases(i)._1)
-            .addToHostnames(hosts(0),hosts(1)).endHostAlias()
+            .addToHostnames(hosts(0), hosts(1)).endHostAlias()
         }
       }
       spec.endSpec()
