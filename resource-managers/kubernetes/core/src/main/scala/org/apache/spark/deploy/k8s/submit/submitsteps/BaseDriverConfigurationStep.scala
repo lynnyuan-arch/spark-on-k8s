@@ -160,9 +160,11 @@ private[spark] class BaseDriverConfigurationStep(
       for(i <- 0 until hostAliases.length) {
         val hosts = hostAliases(i)._2.split(",")
         if(hosts.length == 1) {
-          spec.addNewHostAlias().withIp(hostAliases(i)._1).addToHostnames(hosts(0)).endHostAlias()
-        }else {
-          spec.addNewHostAlias().withIp(hostAliases(i)._1).addToHostnames(hosts(0),hosts(1)).endHostAlias()
+          spec.addNewHostAlias().withIp(hostAliases(i)._1)
+            .addToHostnames(hosts(0)).endHostAlias()
+        } else {
+          spec.addNewHostAlias().withIp(hostAliases(i)._1)
+            .addToHostnames(hosts(0),hosts(1)).endHostAlias()
         }
       }
       spec.endSpec()
